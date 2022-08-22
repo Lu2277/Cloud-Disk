@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	secretID  = "AKID73j9JDrFMDpBH7h26uTmpcASUGm34pKb"
-	secretKey = "3tToukKejX5NQDk13qODm6AyXqthFYcQ"
+	secretID  = "secretID"
+	secretKey = "secretKey"
 )
 
 //文件上传
