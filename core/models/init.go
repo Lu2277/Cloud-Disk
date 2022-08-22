@@ -35,8 +35,8 @@ func InitCosClient() *cos.Client {
 	b := &cos.BaseURL{BucketURL: u}
 	c := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
-			SecretID:  "00AKID73j9JDrFMDpBH7h26uTmpcASUGm34pKb00",
-			SecretKey: "553tToukKejX5NQDk13qODm6AyXqthFYcQ55",
+			SecretID:  "SecretId",
+			SecretKey: "SecretKey",
 		},
 	})
 	return c
