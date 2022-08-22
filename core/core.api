@@ -1,0 +1,214 @@
+service core-api {
+	//用户登录
+	@handler UserLogin
+	post /user/login(LoginRequest) returns (LoginResponse)
+	//用户详情
+	@handler UserDetail
+	get /user/detail(UserDetailRequest) returns (UserDetailResponse)
+	//发送随机验证码
+	@handler SendCode
+	post /code/send(SendCodeRequest) returns (SendCodeResponse)
+	//用户注册
+	@handler UserRegister
+	post /user/register(RegisterRequest) returns (RegisterResponse)
+	//文件分享详情
+	@handler ShareDetail
+	get /share/detail(ShareDetailRequest) returns (ShareDetailResponse)
+}
+
+//使用中间件认证，用户登录了才能进行相关操作
+@server (
+	middleware :Auth
+)
+service core-api {
+	//刷新Authorization
+	@handler RefreshAuth
+	post /user/refresh/auth(RefreshAuthRequest) returns (RefreshAuthResponse)
+	//文件上传
+	@handler FileUpload
+	post /file/upload(FileUploadRequest) returns (FileUploadResponse)
+	//用户文件的关联
+	@handler UserRepositorySave
+	post /user/repository/save(UserRepositorySaveRequest) returns (UserRepositorySaveResponse)
+	//用户文件列表
+	@handler UserFileList
+	get /user/file/list(UserFileListRequest) returns (UserFileListResponse)
+	//用户文件名修改
+	@handler UserFileNameUpdate
+	post /user/file/name/update(UserFileNameUpdateRequest) returns (UserFileNameUpdateResponse)
+	//用户文件夹创建
+	@handler UserFolderCreate
+	post /user/folder/create(UserFolderCreateRequest) returns (UserFolderCreateResponse)
+	//用户文件删除
+	@handler UserFileDelete
+	delete /user/file/delete(UserFileDeleteRequest) returns (UserFileDeleteResponse)
+	//用户文件移动(修改parent_id即可)
+	@handler UserFileMove
+	put /user/file/move(UserFileMoveRequest) returns (UserFileMoveResponse)
+	//分享记录
+	@handler ShareRecord
+	post /share/record(ShareRecordRequest) returns (ShareRecordResponse)
+	//分享的资源保存
+	@handler ShareSave
+	post /share/save(ShareSaveRequest) returns (ShareSaveResponse)
+	//上传文件前的预处理（数据库中存在该文件则直接秒传，否则返回Key和UploadID作下一步文件分片处理）
+	@handler FileUploadPrepare
+	post /file/upload/prepare(FileUploadPrepareRequest) returns (FileUploadPrepareResponse)
+	//上传分片
+	@handler FileChuckUpload
+	post /file/chuck/upload(FileChuckUploadRequest) returns (FileChuckUploadResponse)
+	//完成分片上传
+	@handler FileChuckUploadComplete
+	post /file/chuck/upload/complete(FileChuckUploadCompleteRequest) returns (FileChuckUploadCompleteResponse)
+}
+
+type LoginRequest {
+	Name string `json:"name"`
+	//	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+type LoginResponse {
+	Token        string `json:"token"`         //较短时间有效的token
+	RefreshToken string `json:"refresh_token"` //较长时间有效的token
+}
+type RefreshAuthRequest{}
+type RefreshAuthResponse {
+	Token        string `json:"token"`         //较短时间有效的token
+	RefreshToken string `json:"refresh_token"` //较长时间有效的token
+}
+
+type UserDetailRequest {
+	Identity string `json:"identity"`
+}
+type UserDetailResponse {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+type SendCodeRequest {
+	Email string `json:"email"`
+}
+type SendCodeResponse {
+	Code string `json:"code"`
+}
+type RegisterRequest {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Code     string `json:"code"`
+}
+type RegisterResponse {
+	Message string `json:"message"`
+}
+type FileUploadRequest {
+	Name string `json:"name,optional"`
+	Hash string `json:"hash,optional"`
+	Ext  string `json:"ext,optional"`
+	Size int64  `json:"size,optional"`
+	Path string `json:"path,optional"`
+}
+type FileUploadResponse {
+	Identity string `json:"identity"`
+	Name     string `json:"name"`
+	Ext      string `json:"ext"`
+}
+type UserRepositorySaveRequest {
+	ParentId           int64  `json:"parentId"`
+	RepositoryIdentity string `json:"repositoryIdentity"`
+	Name               string `json:"name"`
+	Ext                string `json:"ext"`
+}
+type UserRepositorySaveResponse {}
+type UserFileListRequest {
+	Id   int64 `json:"id,optional"` //当前文件夹所在的id
+	Page int   `json:"page,optional"`
+	Size int   `json:"size,optional"`
+}
+type UserFileListResponse {
+	List  []*UserFile `json:"list"`
+	Count int64       `json:"count"`
+}
+type UserFile {
+	Id                 int    `json:"id"`
+	Identity           string `json:"identity"`
+	RepositoryIdentity string `json:"repositoryIdentity"`
+	Name               string `json:"name"`
+	Ext                string `json:"ext"`
+	Size               int64  `json:"size"`
+	Path               string `json:"path"`
+}
+type UserFileNameUpdateRequest {
+	Identity string `json:"identity"`
+	Name     string `json:"name"`
+}
+type UserFileNameUpdateResponse {}
+type UserFolderCreateRequest {
+	ParentId int64  `json:"parent_id"`
+	Name     string `json:"name"`
+}
+type UserFolderCreateResponse {
+	Identity string `json:"identity"`
+}
+type UserFileDeleteRequest {
+	Identity string `json:"identity"`
+}
+type UserFileDeleteResponse {}
+type UserFileMoveRequest {
+	Identity       string `json:"identity"`
+	ParentIdentity string `json:"parent_identity"`
+}
+type UserFileMoveResponse{}
+type ShareRecordRequest {
+	UserRepositoryIdentity string `json:"user_repository_identity"`
+	ExpiredTime            int    `json:"expired_time"`
+}
+type ShareRecordResponse {
+	Identity string `json:"identity"`
+}
+type ShareDetailRequest {
+	Identity string `json:"identity"`
+}
+type ShareDetailResponse {
+	RepositoryIdentity string `json:"repository_identity"`
+	Name               string `json:"name"`
+	Ext                string `json:"ext"`
+	Size               int64  `json:"size"`
+	Path               string `json:"path"`
+}
+type ShareSaveRequest {
+	RepositoryIdentity string `json:"repository_identity"`
+	ParentId           int64  `json:"parent_id"`
+}
+type ShareSaveResponse {
+	Identity string `json:"identity"`
+}
+type FileUploadPrepareRequest {
+	Hash string `json:"hash"`
+	Name string `json:"name"`
+	Ext  string `json:"ext"`
+}
+type FileUploadPrepareResponse {
+	Identity string `json:"identity"`
+	UploadId string `json:"upload_id"`
+	Key      string `json:"key"`
+}
+type FileChuckUploadRequest {
+	//从fromdata中获取以下参数
+	//	Key      string
+	//	UploadId string
+	//PartNumber int
+}
+type FileChuckUploadResponse {
+	ETag string `json:"etag"` //分片的Md5值
+}
+type FileChuckUploadCompleteRequest {
+	Key        string      `json:"key"`
+	UploadId   string      `json:"upload_id"`
+	CosObjects []CosObject `json:"cos_objects"`
+}
+type CosObject {
+	PartNumber int    `json:"part_number"`
+	Etag       string `json:"etag"`
+}
+type FileChuckUploadCompleteResponse {
+	Identity string `json:"identity"` // 存储池identity
+}
