@@ -9,3 +9,6 @@ goctl api go -api core.api -dir . -style go_zer
 
 ## 启动服务
 go run core.go -f etc/core-api.yaml
+
+##腾讯云COS帮助文档
+https://cloud.tencent.com/document/product/436/31215
